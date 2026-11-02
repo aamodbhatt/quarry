@@ -10,4 +10,3 @@ docs/assets
 .ruff_cache
 .pytest_cache
 .hypothesis
-RESUME.md

@@ -174,7 +174,7 @@ The parts worth reading:
 
 ## Results
 
-Measured on the owner's laptop: **Intel Core Ultra 9 275HX (24 logical CPUs), Windows 11,
+Measured on a laptop: **Intel Core Ultra 9 275HX (24 logical CPUs), Windows 11,
 Python 3.12, CPU only, no LLM**. Full report: [`docs/results/offline.md`](docs/results/offline.md)
 ([JSON](docs/results/offline.json)). Regenerate with `uv run quarry eval offline`.
 
@@ -373,9 +373,20 @@ scripts/capture_ui.py README visuals (Playwright + Edge)
 docs/                 DESIGN.md, results/, assets/
 ```
 
-## Demo data
+## Data and credits
 
-The warehouse is built from Kevin Hillstrom's public
+All datasets are downloaded at runtime; none are shipped in this repository.
+
+- **Spider** (Yu et al., EMNLP 2018; [yale-lily.github.io/spider](https://yale-lily.github.io/spider)),
+  CC BY-SA 4.0. Questions and gold SQL come from the
+  [xlangai/spider](https://huggingface.co/datasets/xlangai/spider) mirror and schemas from
+  [taoyds/test-suite-sql-eval](https://github.com/taoyds/test-suite-sql-eval). The guard,
+  schema-linking and difficulty results above are computed on it, and
+  [`docs/results/`](docs/results/) quotes one gold query (`train_spider` #3153).
+- **[deepset/prompt-injections](https://huggingface.co/datasets/deepset/prompt-injections)**,
+  Apache-2.0: the external injection test set.
+
+The demo warehouse is built from Kevin Hillstrom's public
 [MineThatData e-mail analytics challenge](https://blog.minethatdata.com/2008/03/minethatdata-e-mail-analytics-and-data.html):
 64,000 customers who bought in the past year, randomly split into a men's e-mail, a women's
 e-mail and a no-e-mail control, with visits, conversions and spend tracked for two weeks.
