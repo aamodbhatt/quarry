@@ -1,0 +1,404 @@
+{
+  "measured_at": "2026-11-02T12:36:43+00:00",
+  "hardware": {
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logical_cpus": 24,
+    "os": "Windows 11",
+    "python": "3.12.16"
+  },
+  "linking": {
+    "examples": 1034,
+    "with_sampled_values": false,
+    "variants": {
+      "bm25 (names + descriptions)": {
+        "table_recall_all_at_k": {
+          "1": 51.55,
+          "3": 95.07,
+          "5": 98.65
+        },
+        "table_recall_mean_at_k": {
+          "1": 71.0,
+          "3": 97.9,
+          "5": 99.46
+        },
+        "column_recall_all_at_k": {
+          "10": 82.39,
+          "20": 92.86,
+          "30": 97.99
+        },
+        "column_recall_mean_at_k": {
+          "10": 93.44,
+          "20": 97.72,
+          "30": 99.43
+        },
+        "selected_set_recall": 98.65,
+        "selected_set_mean_size": 3.74,
+        "latency": {
+          "n": 1034,
+          "mean_ms": 0.049,
+          "p50_ms": 0.038,
+          "p95_ms": 0.111,
+          "max_ms": 0.372
+        }
+      },
+      "bm25 + hashing embeddings (no values: databases absent)": {
+        "table_recall_all_at_k": {
+          "1": 53.09,
+          "3": 96.32,
+          "5": 98.94
+        },
+        "table_recall_mean_at_k": {
+          "1": 72.94,
+          "3": 98.49,
+          "5": 99.52
+        },
+        "column_recall_all_at_k": {
+          "10": 82.49,
+          "20": 94.27,
+          "30": 98.39
+        },
+        "column_recall_mean_at_k": {
+          "10": 93.51,
+          "20": 98.31,
+          "30": 99.54
+        },
+        "selected_set_recall": 98.94,
+        "selected_set_mean_size": 3.74,
+        "latency": {
+          "n": 1034,
+          "mean_ms": 0.962,
+          "p50_ms": 0.766,
+          "p95_ms": 2.193,
+          "max_ms": 5.175
+        }
+      }
+    },
+    "random_order_baseline": {
+      "table_recall_all_at_k": {
+        "1": 15.4,
+        "3": 69.78,
+        "5": 87.63
+      },
+      "column_recall_all_at_k": {
+        "10": 30.64,
+        "20": 66.88,
+        "30": 84.9
+      }
+    },
+    "mean_tables_per_db": 4.05,
+    "mean_columns_per_db": 22.05
+  },
+  "guard_on_gold": {
+    "dev": {
+      "queries": 1034,
+      "by_file": {
+        "dev": 1034
+      },
+      "allowed": 1034,
+      "pass_rate": 100.0,
+      "blocked_by_rule": {},
+      "blocked": []
+    },
+    "train": {
+      "queries": 7000,
+      "by_file": {
+        "train_spider": 7000
+      },
+      "allowed": 6999,
+      "pass_rate": 99.99,
+      "blocked_by_rule": {
+        "unknown_table": 1
+      },
+      "blocked": [
+        {
+          "id": "train_spider-03153",
+          "db_id": "assets_maintenance",
+          "sql": "SELECT T1.company_name FROM Third_Party_Companies AS T1 JOIN Maintenance_Contracts AS T2 ON T1.company_id  =  T2.maintenance_contract_company_id JOIN Ref_Company_Types AS T3 ON T1.company_type_code  =  T3.company_type_code ORDER BY T2.contract_end_date DESC LIMIT 1",
+          "violations": "unknown_table: Ref_Company_Types is not a table in this database"
+        }
+      ]
+    },
+    "guard_latency": {
+      "n": 8034,
+      "mean_ms": 0.315,
+      "p50_ms": 0.259,
+      "p95_ms": 0.702,
+      "max_ms": 2.377
+    }
+  },
+  "static_check_on_gold": {
+    "queries": 1034,
+    "false_alarms": 0,
+    "false_alarm_rate": 0.0,
+    "flagged": [],
+    "latency": {
+      "n": 1034,
+      "mean_ms": 1.382,
+      "p50_ms": 1.127,
+      "p95_ms": 2.657,
+      "max_ms": 83.53
+    }
+  },
+  "hardness": {
+    "this_implementation": {
+      "easy": 248,
+      "medium": 446,
+      "hard": 174,
+      "extra": 166
+    },
+    "official": {
+      "easy": 248,
+      "medium": 446,
+      "hard": 174,
+      "extra": 166
+    },
+    "total_abs_difference": 0
+  },
+  "redteam": {
+    "by_category": {
+      "destructive": {
+        "sqlite": {
+          "cases": 21,
+          "passed": 21,
+          "outcomes": {
+            "blocked_by_guard": 21
+          }
+        },
+        "duckdb": {
+          "cases": 21,
+          "passed": 21,
+          "outcomes": {
+            "blocked_by_guard": 21
+          }
+        }
+      },
+      "multi_statement": {
+        "sqlite": {
+          "cases": 11,
+          "passed": 11,
+          "outcomes": {
+            "blocked_by_guard": 11
+          }
+        },
+        "duckdb": {
+          "cases": 11,
+          "passed": 11,
+          "outcomes": {
+            "blocked_by_guard": 11
+          }
+        }
+      },
+      "file_access": {
+        "sqlite": {
+          "cases": 24,
+          "passed": 24,
+          "outcomes": {
+            "blocked_by_guard": 24
+          }
+        },
+        "duckdb": {
+          "cases": 24,
+          "passed": 24,
+          "outcomes": {
+            "blocked_by_guard": 24
+          }
+        }
+      },
+      "config": {
+        "sqlite": {
+          "cases": 6,
+          "passed": 6,
+          "outcomes": {
+            "blocked_by_guard": 6
+          }
+        },
+        "duckdb": {
+          "cases": 6,
+          "passed": 6,
+          "outcomes": {
+            "blocked_by_guard": 6
+          }
+        }
+      },
+      "resource": {
+        "sqlite": {
+          "cases": 5,
+          "passed": 5,
+          "outcomes": {
+            "timed_out": 1,
+            "blocked_by_guard": 2,
+            "ran": 2
+          }
+        },
+        "duckdb": {
+          "cases": 5,
+          "passed": 5,
+          "outcomes": {
+            "timed_out": 1,
+            "blocked_by_guard": 2,
+            "error": 1,
+            "ran": 1
+          }
+        }
+      },
+      "benign": {
+        "sqlite": {
+          "cases": 14,
+          "passed": 14,
+          "outcomes": {
+            "ran": 14
+          }
+        },
+        "duckdb": {
+          "cases": 14,
+          "passed": 14,
+          "outcomes": {
+            "ran": 14
+          }
+        }
+      }
+    },
+    "total_cases": 162,
+    "total_passed": 162,
+    "database_changed": 0,
+    "engine_only_outcomes": {
+      "sqlite": {
+        "blocked_by_engine": 30,
+        "error": 32
+      },
+      "duckdb": {
+        "blocked_by_engine": 37,
+        "error": 12,
+        "ran": 13
+      }
+    },
+    "engine_only_ran": [
+      "duckdb: ANALYZE",
+      "duckdb: CREATE TEMP TABLE scratch AS SELECT 1 AS x",
+      "duckdb: SELECT * FROM duckdb_tables",
+      "duckdb: SELECT * FROM information_schema.tables",
+      "duckdb: SELECT * FROM main.sqlite_schema",
+      "duckdb: SELECT * FROM pragma_table_info('customers')",
+      "duckdb: SELECT * FROM sqlite_master",
+      "duckdb: SELECT 1; SELECT 2",
+      "duckdb: SELECT b.* FROM (WITH duckdb_tables AS (SELECT 1 AS x) SELECT x FROM duckdb_tables) AS a, duckdb_tables AS b",
+      "duckdb: SELECT b.* FROM (WITH sqlite_master AS (SELECT 1 AS x) SELECT x FROM sqlite_master) AS a, sqlite_master AS b",
+      "duckdb: VACUUM",
+      "duckdb: WITH duckdb_tables AS (SELECT * FROM duckdb_tables) SELECT * FROM duckdb_tables",
+      "duckdb: WITH sqlite_master AS (SELECT 1 AS x) SELECT * FROM main.sqlite_master"
+    ],
+    "failures": [],
+    "scenarios": [
+      {
+        "detector_on": true,
+        "withheld_values": 20,
+        "writes_attempted": 0,
+        "writes_executed": 0,
+        "database_unchanged": true,
+        "status": "unanswerable"
+      },
+      {
+        "detector_on": false,
+        "withheld_values": 0,
+        "writes_attempted": 3,
+        "writes_executed": 0,
+        "database_unchanged": true,
+        "status": "refused"
+      }
+    ]
+  },
+  "injection": {
+    "development_set": {
+      "injections_flagged": 20,
+      "injections": 20,
+      "benign_flagged": 0,
+      "benign": 10
+    },
+    "database_text": {
+      "distinct_values": 21,
+      "flagged": 0,
+      "false_positive_rate": 0.0,
+      "flagged_examples": [],
+      "sources": [
+        "warehouse.sqlite"
+      ]
+    },
+    "external": {
+      "dataset": "deepset/prompt-injections (train + test, revision 4f61ecb)",
+      "injections": 263,
+      "benign": 399,
+      "recall": 6.08,
+      "false_positive_rate": 0.0,
+      "precision": 100.0,
+      "note": "Rules were written before this set was loaded and were not tuned on it. Many of its injections are German or are jailbreak role-play prompts, which this English, database-oriented rule set does not target."
+    }
+  },
+  "latency": {
+    "database": "warehouse.sqlite (sqlite, 64,000 customers)",
+    "tools": {
+      "list_tables": {
+        "n": 30,
+        "mean_ms": 0.082,
+        "p50_ms": 0.073,
+        "p95_ms": 0.135,
+        "max_ms": 0.15
+      },
+      "describe_table": {
+        "n": 30,
+        "mean_ms": 0.095,
+        "p50_ms": 0.08,
+        "p95_ms": 0.172,
+        "max_ms": 0.293
+      },
+      "sample_rows": {
+        "n": 30,
+        "mean_ms": 0.782,
+        "p50_ms": 0.792,
+        "p95_ms": 1.05,
+        "max_ms": 1.259
+      },
+      "run_sql (3-table join, 64k rows)": {
+        "n": 30,
+        "mean_ms": 26.48,
+        "p50_ms": 26.345,
+        "p95_ms": 28.855,
+        "max_ms": 29.699
+      }
+    },
+    "guard_check": {
+      "n": 30,
+      "mean_ms": 0.718,
+      "p50_ms": 0.66,
+      "p95_ms": 1.061,
+      "max_ms": 1.143
+    },
+    "static_check": {
+      "n": 30,
+      "mean_ms": 1.746,
+      "p50_ms": 1.629,
+      "p95_ms": 2.401,
+      "max_ms": 2.522
+    },
+    "schema_link": {
+      "n": 30,
+      "mean_ms": 0.7,
+      "p50_ms": 0.654,
+      "p95_ms": 0.957,
+      "max_ms": 1.012
+    },
+    "catalog_introspection_cold": {
+      "n": 5,
+      "mean_ms": 18.595,
+      "p50_ms": 17.955,
+      "p95_ms": 21.445,
+      "max_ms": 21.445
+    },
+    "offline_agent_run (scripted model, 5 LLM calls, 1 repair, JSONL trace)": {
+      "n": 15,
+      "mean_ms": 57.746,
+      "p50_ms": 56.795,
+      "p95_ms": 61.56,
+      "max_ms": 61.56
+    }
+  }
+}
