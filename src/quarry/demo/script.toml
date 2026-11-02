@@ -1,0 +1,133 @@
+# The offline demo script: what the scripted model says for each demo question.
+#
+# This is NOT an LLM. It exists so the full agent (schema linking, tool calls, the guard,
+# the static check, the sandbox, self-correction, memory, tracing, the UI) can be shown and
+# tested without an API key. Every number in an answer is filled in from the real query
+# result at run time; the wording around it is fixed here.
+#
+# Fields per question:
+#   patterns   regexes (case-insensitive); the first question with a match is used
+#   explore    tool calls made while planning, in order
+#   plan       the plan text
+#   sql        one or more run_sql submissions; later ones are repairs after an error
+#   refusal    text sent instead of SQL once every scripted query has been used
+#   answer     a str.format template over first, last, rows, columns and row_count
+
+[[question]]
+id = "best-campaign"
+patterns = ["which campaign", "best conversion", "highest conversion"]
+explore = [{ tool = "describe_table", args = { table = "outcomes" } }]
+plan = """1. Start from campaign_sends: one row per customer and campaign arm.
+2. Join campaigns for the arm's name and outcomes for visits, conversions and spend.
+3. Group by campaign; compute customers, visit rate, conversion rate and revenue.
+4. Order by conversion rate, highest first."""
+# The first submission uses a column that does not exist (conversion instead of converted)
+# so the demo shows the static check catching it and the repair loop fixing it.
+sql = [
+  """SELECT c.name AS campaign,
+       COUNT(*) AS customers,
+       ROUND(AVG(o.conversion) * 100.0, 2) AS conversion_rate_pct
+FROM campaign_sends AS s
+JOIN campaigns AS c ON c.campaign_id = s.campaign_id
+JOIN outcomes AS o ON o.send_id = s.send_id
+GROUP BY c.name
+ORDER BY conversion_rate_pct DESC""",
+  """SELECT c.name AS campaign,
+       ROUND(AVG(o.converted) * 100.0, 2) AS conversion_rate_pct,
+       ROUND(AVG(o.visited) * 100.0, 2) AS visit_rate_pct,
+       COUNT(*) AS customers,
+       ROUND(SUM(o.spend_usd), 2) AS revenue_usd
+FROM campaign_sends AS s
+JOIN campaigns AS c ON c.campaign_id = s.campaign_id
+JOIN outcomes AS o ON o.send_id = s.send_id
+GROUP BY c.name
+ORDER BY conversion_rate_pct DESC""",
+]
+answer = """**{first[0]}** converted best: {first[1]}% of its {first[3]:,} customers bought something \
+within two weeks, against {last[1]}% for the {last[0]} control group. Its two-week revenue \
+was ${first[4]:,.2f}."""
+
+[[question]]
+id = "by-channel"
+patterns = ["by (purchase )?channel", "break (that|it) down", "per channel"]
+plan = """1. Reuse the previous query's joins (campaign_sends, campaigns, outcomes).
+2. Add customers to get each customer's purchase channel.
+3. Group by campaign and channel; compute the conversion rate and customer count.
+4. Order by conversion rate, highest first."""
+sql = [
+  """SELECT c.name AS campaign,
+       cu.channel AS channel,
+       ROUND(AVG(o.converted) * 100.0, 2) AS conversion_rate_pct,
+       COUNT(*) AS customers
+FROM campaign_sends AS s
+JOIN campaigns AS c ON c.campaign_id = s.campaign_id
+JOIN customers AS cu ON cu.customer_id = s.customer_id
+JOIN outcomes AS o ON o.send_id = s.send_id
+GROUP BY c.name, cu.channel
+ORDER BY conversion_rate_pct DESC""",
+]
+answer = """Broken down by purchase channel, the best combination is **{first[0]} to \
+{first[1]} customers** at {first[2]}% conversion ({first[3]:,} customers); the weakest is \
+{last[0]} to {last[1]} customers at {last[2]}%."""
+
+[[question]]
+id = "revenue-lift"
+patterns = ["revenue per customer", "lift", "compared with (sending )?nothing", "incremental"]
+plan = """1. Average spend per customer for each campaign arm (campaign_sends, campaigns, outcomes).
+2. Take the control arm's average as the baseline.
+3. Subtract the baseline from each e-mail arm to get the lift per customer."""
+sql = [
+  """WITH per_campaign AS (
+  SELECT c.name AS campaign, c.is_control, AVG(o.spend_usd) AS spend_per_customer
+  FROM campaign_sends AS s
+  JOIN campaigns AS c ON c.campaign_id = s.campaign_id
+  JOIN outcomes AS o ON o.send_id = s.send_id
+  GROUP BY c.name, c.is_control
+)
+SELECT p.campaign,
+       ROUND(p.spend_per_customer - ctl.spend_per_customer, 3) AS lift_vs_control_usd,
+       ROUND(p.spend_per_customer, 3) AS spend_per_customer_usd
+FROM per_campaign AS p
+CROSS JOIN (SELECT spend_per_customer FROM per_campaign WHERE is_control = 1) AS ctl
+WHERE p.is_control = 0
+ORDER BY lift_vs_control_usd DESC""",
+]
+answer = """Compared with sending nothing, the **{first[0]}** added about ${first[1]:.2f} of \
+two-week revenue per customer (${first[2]:.2f} per customer in total), and the {last[0]} \
+added about ${last[1]:.2f}."""
+
+[[question]]
+id = "recency"
+patterns = ["recency", "since (the |their )?last purchase"]
+plan = """1. Join customers to their send and outcome.
+2. Group by months since last purchase (recency_months).
+3. Compute the conversion rate per month, ordered by recency."""
+sql = [
+  """SELECT cu.recency_months,
+       ROUND(AVG(o.converted) * 100.0, 2) AS conversion_rate_pct,
+       COUNT(*) AS customers
+FROM customers AS cu
+JOIN campaign_sends AS s ON s.customer_id = cu.customer_id
+JOIN outcomes AS o ON o.send_id = s.send_id
+GROUP BY cu.recency_months
+ORDER BY cu.recency_months""",
+]
+answer = """Conversion is {first[1]}% for customers whose last purchase was {first[0]} \
+month(s) before the campaign and {last[1]}% at {last[0]} months; the chart shows every month."""
+
+[[question]]
+id = "delete-attempt"
+patterns = ["^\\s*(delete|drop|remove|update|insert)"]
+plan = """1. This asks to change data. quarry only reads, so the guard will refuse any write."""
+sql = [
+  """DELETE FROM customers
+WHERE customer_id IN (
+  SELECT s.customer_id FROM campaign_sends AS s
+  JOIN outcomes AS o ON o.send_id = s.send_id
+  WHERE o.visited = 0
+)""",
+]
+refusal = """I can't do that: quarry is read-only. The SQL guard refused the DELETE before it \
+reached the database, and nothing was changed. I can show you which customers never \
+visited instead."""
+answer = "{row_count} rows."

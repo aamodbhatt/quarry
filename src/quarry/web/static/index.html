@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>quarry</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="/static/favicon.svg" alt="" width="22" height="22">
+      <span class="name">quarry</span>
+      <span class="tagline">ask your database anything</span>
+    </div>
+    <div class="meta">
+      <span class="pill" id="db-pill">connecting…</span>
+      <span class="pill mode" id="mode-pill"></span>
+      <button class="ghost" id="new-chat" type="button">New conversation</button>
+    </div>
+  </header>
+  <div class="banner" id="offline-banner" hidden>
+    Offline scripted demo: the model's replies come from a script replayed through the real agent
+    (real tool calls, guard, sandbox, memory and traces). No LLM is called.
+  </div>
+  <main class="grid">
+    <section class="panel chat">
+      <h2>Conversation</h2>
+      <div class="messages" id="messages">
+        <div class="empty" id="chat-empty">
+          Ask a question about the database. Follow-ups like <em>"break that down by channel"</em>
+          remember the conversation.
+        </div>
+      </div>
+      <div class="examples" id="examples"></div>
+      <form class="ask" id="ask-form" autocomplete="off">
+        <input id="question" name="question" type="text" placeholder="Ask about campaigns, visits, conversions, spend…" maxlength="2000">
+        <button type="submit" id="ask-button">Ask</button>
+      </form>
+    </section>
+    <section class="panel steps">
+      <h2>Agent steps <span class="sub" id="steps-sub"></span></h2>
+      <ol class="timeline" id="timeline">
+        <li class="placeholder">The plan, every tool call, each SQL attempt and its checks appear here as they happen.</li>
+      </ol>
+    </section>
+    <section class="panel output">
+      <div class="card result-card">
+        <h2>Result <span class="sub" id="result-sub"></span></h2>
+        <div class="table-wrap" id="result"><div class="placeholder">No result yet.</div></div>
+      </div>
+      <div class="card">
+        <h2>Chart <span class="sub">Vega-Lite, picked from the result's shape</span></h2>
+        <div id="chart" class="chart"><div class="placeholder">A chart appears when the result has a category or time axis.</div></div>
+      </div>
+      <div class="card">
+        <h2>Trace <span class="sub" id="trace-sub"></span></h2>
+        <div id="trace" class="trace"><div class="placeholder">Spans from the run's JSONL trace.</div></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
