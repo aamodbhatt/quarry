@@ -1,0 +1,46 @@
+# quarry configuration. Every field is optional; these are the defaults.
+# Secrets never go here: the OpenRouter key is read from OPENROUTER_API_KEY (or .env).
+
+database = "data/warehouse.sqlite"      # SQLite or DuckDB file; override with --db
+memory_path = "runs/memory.sqlite"      # LangGraph checkpointer for `quarry chat` and the web UI
+
+[llm]
+# Any OpenRouter model id that supports tool calling. This default was picked from
+# https://openrouter.ai/api/v1/models on 2026-11-02: free, with `tools` and `tool_choice`.
+# Free models have tight rate limits; for the full benchmark a cheap paid model such as
+# "deepseek/deepseek-v3.2" or "openai/gpt-oss-120b" is the practical choice.
+model = "google/gemma-4-31b-it:free"
+base_url = "https://openrouter.ai/api/v1"
+temperature = 0.0
+max_output_tokens = 1024
+request_timeout_s = 90.0
+max_retries = 4
+requests_per_second = 0.3               # client-side limiter (~18 requests/minute)
+
+[agent]
+max_repairs = 3                         # SQL attempts after the first
+max_explore_calls = 4                   # list_tables / describe_table / sample_rows per question
+max_steps = 16                          # LLM calls + tool calls per question
+max_tokens = 40000                      # prompt + completion tokens per question
+history_turns = 4                       # earlier turns shown to the model for follow-ups
+preview_rows = 20                       # result rows the model sees
+
+[sql]
+row_limit = 500                         # rows fetched per statement
+timeout_ms = 5000                       # statements past this are interrupted
+max_value_chars = 500                   # longer cell values are clipped before the model sees them
+
+[linking]
+top_tables = 5
+top_columns = 25
+sample_values = 8                       # distinct values sampled per text column
+use_embeddings = true                   # fuse the hashing embedder with BM25
+
+[tracing]
+dir = "runs/traces"                     # one JSONL file per question
+langfuse = false                        # also needs LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY
+langsmith = false                       # also needs LANGSMITH_API_KEY
+
+[server]
+host = "127.0.0.1"
+port = 8097

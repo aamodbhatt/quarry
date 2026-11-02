@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+*.egg-info/
+
+# Secrets
+.env
+
+# Derived data, runs and caches (rebuilt with `quarry demo build`, `quarry data spider`, ...)
+/data/
+/runs/
+/artifacts/
+/dist/
+/build/
+/.jobs/
+/.cache/
+*.log
+
+# Browser tooling
+node_modules/
+playwright-report/
+test-results/
+
+# Local working notes
+/RESUME.md

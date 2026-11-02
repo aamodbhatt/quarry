@@ -1,0 +1,13 @@
+.git
+.venv
+.env
+data
+runs
+artifacts
+docs/assets
+**/__pycache__
+.mypy_cache
+.ruff_cache
+.pytest_cache
+.hypothesis
+RESUME.md
